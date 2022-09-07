@@ -20,7 +20,6 @@ class CreateProductsTable extends Migration
             $table->string('slug');
             $table->string('description')->nullable();
             $table->decimal('price');
-            $table->boolean('is_active');
             $table->timestamps();
         });
     }

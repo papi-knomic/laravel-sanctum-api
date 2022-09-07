@@ -16,7 +16,6 @@ class Product extends Model
         'description',
         'price',
         'user_id',
-        'is_active'
     ];
 
     //relationship to user

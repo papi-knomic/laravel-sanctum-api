@@ -33,7 +33,6 @@ class ProductController extends Controller
         ]);
 
       $formFields['user_id'] = auth()->id();
-      $formFields['is_active'] = true;
         return Product::create($formFields);
     }
 
