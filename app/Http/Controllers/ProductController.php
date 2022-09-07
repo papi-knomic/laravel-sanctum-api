@@ -121,4 +121,28 @@ class ProductController extends Controller
         ]);
     }
 
+    public function inactiveProducts()
+    {
+        $products = Product::inactive()->get();
+
+        return response([
+            'message' => 'Inactive Products retrieved',
+            'status' => true,
+            'data' => $products
+        ]);
+    }
+
+    public function activeProducts()
+    {
+        $products = Product::active()->get();
+
+        return response([
+            'message' => 'Active Products retrieved',
+            'status' => true,
+            'data' => $products
+        ]);
+    }
+
+
+
 }

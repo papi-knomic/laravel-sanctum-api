@@ -2,9 +2,10 @@
 
 namespace App\Repository;
 
+use App\Interfaces\ProductRepositoryInterface;
 use App\Models\Product;
 
-class ProductRepository implements \App\Interfaces\ProductRepositoryInterface
+class ProductRepository implements ProductRepositoryInterface
 {
 
     public function create(array $data)
@@ -31,6 +32,25 @@ class ProductRepository implements \App\Interfaces\ProductRepositoryInterface
 
     public function delete(int $id)
     {
-        // TODO: Implement delete() method.
+        return Product::find($id)->delete();
+    }
+
+    public function getUserProducts(int $userID)
+    {
+//       return Product::where('user', $userID)->user()->products
+    }
+
+    public function activateProduct(int $id)
+    {
+        $meal = Product::find($id);
+        $meal->update(['is_active' => true]);
+        return $meal;
+    }
+
+    public function deactivateProduct(int $id)
+    {
+        $meal = Product::find($id);
+        $meal->update(['is_active' => false]);
+        return $meal;
     }
 }

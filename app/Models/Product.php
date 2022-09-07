@@ -27,4 +27,20 @@ class Product extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    /**
+     * @var mixed
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
+    }
+
+    /**
+     * @var mixed
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }
