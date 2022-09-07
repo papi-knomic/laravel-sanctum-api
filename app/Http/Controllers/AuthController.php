@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginUserRequest;
+use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -9,14 +11,9 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register( Request $request )
+    public function register( StoreUserRequest $request )
     {
-        $fields = $request->validate([
-            'firstname' => 'required|string',
-            'lastname' => 'required|string',
-            'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed',
-        ]);
+        $fields = $request->validated();
 
         $user = User::create([
             'firstname' => $fields['firstname'],
@@ -25,7 +22,7 @@ class AuthController extends Controller
             'password' => bcrypt($fields['password'])
             ]);
 
-        $token = $user->createToken( 'prodToken' )->plainTextToken;
+        $token = $user->createToken('prodToken')->plainTextToken;
 
         $response = [
             'user' => $user,
@@ -35,12 +32,9 @@ class AuthController extends Controller
         return response( $response, 201 );
     }
 
-    public function login( Request $request )
+    public function login( LoginUserRequest $request )
     {
-        $fields = $request->validate([
-            'email' => 'required|string',
-            'password' => 'required|string',
-        ]);
+        $fields = $request->validated();
 
        //check email
         $user = User::where( 'email', $fields['email'] )->first();

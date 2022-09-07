@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
-use Illuminate\Http\Request;
 
 
 class ProductController extends Controller
@@ -15,7 +15,13 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return Product::all();
+        $products = Product::get();
+
+        return response([
+            'message' => 'Products retrieved',
+            'status' => true,
+            'data' => $products
+        ], 200);
     }
 
     /**
@@ -24,16 +30,16 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-      $formFields =  $request->validate([
-            'name' => 'required',
-            'slug' => 'required',
-            'price' => 'required'
-        ]);
+        $formFields = $request->validated();
+        $product =  Product::create($formFields);
 
-      $formFields['user_id'] = auth()->id();
-        return Product::create($formFields);
+        return response([
+            'message' => 'Products created',
+            'status' => true,
+            'data' => $product
+        ], 201);
     }
 
     /**
@@ -42,58 +48,46 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Product $product)
     {
-        return Product::find($id);
+        return response([
+            'message' => 'Product retrieved',
+            'status' => true,
+            'data' => $product
+        ], 201);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreProductRequest $request, Product $product)
     {
-        $product = Product::find($id);
         $product->update($request->all());
-        return $product;
+
+        return response([
+            'message' => 'Product updated',
+            'status' => true,
+            'data' => $product
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(int $id)
+    public function destroy(Product $product)
     {
-        $product = Product::find($id);
-
-        if ( !$product ){
-            return response([
-                'message' => 'Product not found',
-                'status' => false,
-            ], 404);
-        }
-        if ( $product->user_id != auth()->id() ){
-            return response([
-                'message' => 'Unauthorized action',
-                'status' => false,
-            ], 403);
-        }
-
-       if (  Product::destroy($product->id ) ) {
-          return response([
-              'message' => 'Product deleted',
-              'status' => true,
-          ]);
-       }
+        $product->delete();
 
         return response([
-            'message' => 'Product could not be deleted',
-            'status' => false,
+            'message' => 'Product deleted',
+            'status' => true,
         ]);
     }
 
@@ -105,20 +99,25 @@ class ProductController extends Controller
      */
     public function search($name)
     {
+        $products =  Product::where('name', 'like', '%'.$name.'%')->get();
+
         return response([
             'message' => 'Products gotten',
             'status' => true,
-            'data' => Product::where('name', 'like', '%'.$name.'%')->get()
+            'data' => $products
         ]);
 
     }
 
-    public function products( Request $request )
+    public function products()
     {
+        $user = auth()->user();
+        $userProducts = $user->products;
+
         return response([
-            'message' => 'Products gotten',
+            'message' => 'Products retrieved for user',
             'status' => true,
-            'data' => auth()->user()->products()->get()
+            'data' => $userProducts
         ]);
     }
 
