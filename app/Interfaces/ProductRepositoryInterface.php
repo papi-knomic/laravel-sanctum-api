@@ -9,7 +9,14 @@ interface ProductRepositoryInterface
     public function getAll();
     public function getById(int $id);
     public function delete(int $id);
-    public function getUserProducts(int $userID);
+    public function getUserProducts();
+    public function getActiveProducts();
+    public function getInactiveProducts();
+    public function getUserActiveProducts();
+    public function getUserInactiveProducts();
+    public function getProductsByUserID(int $userID);
+    public function getActiveProductsByUserID(int $userID);
+    public function getInactiveProductsByUserID(int $userID);
     public function activateProduct(int $id);
     public function deactivateProduct(int $id);
 }

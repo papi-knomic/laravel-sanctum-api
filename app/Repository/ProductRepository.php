@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Interfaces\ProductRepositoryInterface;
 use App\Models\Product;
+use App\Models\User;
 
 class ProductRepository implements ProductRepositoryInterface
 {
@@ -27,7 +28,7 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getById(int $id)
     {
-        // TODO: Implement getById() method.
+        return Product::findOrFail($id);
     }
 
     public function delete(int $id)
@@ -35,22 +36,70 @@ class ProductRepository implements ProductRepositoryInterface
         return Product::find($id)->delete();
     }
 
-    public function getUserProducts(int $userID)
+    public function getUserProducts()
     {
-//       return Product::where('user', $userID)->user()->products
+//       return Product::user()->products;
     }
 
     public function activateProduct(int $id)
     {
-        $meal = Product::find($id);
-        $meal->update(['is_active' => true]);
-        return $meal;
+        $product = Product::find($id);
+        $product->update(['is_active' => true]);
+        return $product;
     }
 
     public function deactivateProduct(int $id)
     {
-        $meal = Product::find($id);
-        $meal->update(['is_active' => false]);
-        return $meal;
+        $product = Product::find($id);
+        $product->update(['is_active' => false]);
+        return $product;
+    }
+
+    public function getActiveProducts()
+    {
+        return Product::isActive(true)->get();
+    }
+
+    public function getInactiveProducts()
+    {
+        return Product::isActive(true)->get();
+    }
+
+    public function getUserActiveProducts()
+    {
+        $user = User::find(auth()->id());
+        $products = $user->products()->isActive(true)->get();
+
+        return $products;
+    }
+
+    public function getUserInactiveProducts()
+    {
+        $user = User::find(auth()->id());
+        $products = $user->products()->isActive(false)->get();
+
+        return $products;
+    }
+
+    public function getProductsByUserID(int $userID)
+    {
+       $user = User::findOrFail($userID);
+       $products = $user->products;
+
+       return $products;
+    }
+
+    public function getActiveProductsByUserID(int $userID)
+    {
+        $user = User::findOrFail($userID);
+        $products = $user->products()->isActive(true)->get();
+        return $products;
+    }
+
+    public function getInactiveProductsByUserID(int $userID)
+    {
+        $user = User::findOrFail($userID);
+        $products = $user->products()->isActive(false)->get();
+        return $products;
     }
 }

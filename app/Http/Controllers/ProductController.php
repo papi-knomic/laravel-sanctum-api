@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
+use App\Models\User;
 
 
 class ProductController extends Controller
@@ -123,7 +124,7 @@ class ProductController extends Controller
 
     public function inactiveProducts()
     {
-        $products = Product::inactive()->get();
+        $products = Product::isActive(false)->get();
 
         return response([
             'message' => 'Inactive Products retrieved',
@@ -134,7 +135,7 @@ class ProductController extends Controller
 
     public function activeProducts()
     {
-        $products = Product::active()->get();
+        $products = Product::isActive(true)->get();
 
         return response([
             'message' => 'Active Products retrieved',
@@ -142,6 +143,32 @@ class ProductController extends Controller
             'data' => $products
         ]);
     }
+
+    public function activeUserProducts()
+    {
+        $user = User::find(auth()->id());
+        $products = $user->products()->isActive(true)->get();
+
+        return response([
+            'message' => 'Active Products retrieved',
+            'status' => true,
+            'data' => $products
+        ]);
+    }
+
+    public function inactiveUserProducts()
+    {
+        $user = User::find(auth()->id());
+        $products = $user->products()->isActive(false)->get();
+
+        return response([
+            'message' => 'Inactive Products retrieved',
+            'status' => true,
+            'data' => $products
+        ]);
+    }
+
+
 
 
 
