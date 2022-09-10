@@ -5,66 +5,52 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Hash;
+use App\Repository\UserRepository;
+use App\Traits\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    /**
+     * @var UserRepository
+     */
+    private $userRepository;
+
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
+    /**
+     * register user
+     * @param StoreUserRequest $request
+     * @return JsonResponse
+     */
     public function register( StoreUserRequest $request )
     {
         $fields = $request->validated();
+        $user = $this->userRepository->create($fields);
 
-        $user = User::create([
-            'firstname' => $fields['firstname'],
-            'lastname' => $fields['lastname'],
-            'email' => $fields['email'],
-            'password' => bcrypt($fields['password'])
-            ]);
-
-        $token = $user->createToken('prodToken')->plainTextToken;
-
-        $response = [
-            'user' => $user,
-            'token' => $token
-        ];
-
-        return response( $response, 201 );
+        return Response::successResponseWithData($user, 'Successful!, check your mail for verification code' );
     }
 
+    /**
+     * Login user
+     * @param LoginUserRequest $request
+     * @return JsonResponse
+     */
     public function login( LoginUserRequest $request )
     {
-        $fields = $request->validated();
 
-       //check email
-        $user = User::where( 'email', $fields['email'] )->first();
+        $userData = $request->validated();
 
-        if ( !$user || !Hash::check( $fields['password'], $user->password ) ) {
-            return response([
-                'message' => 'Invalid credentials'
-            ], 401);
+        if (Auth::attempt($userData)) {
+            $accessToken = Auth::user()->createToken(env('TOKEN'))->plainTextToken;
+            $data = auth()->user();
+            return Response::successResponseWithData($data, 'Login successful', 200, $accessToken);
         }
-        //check password
-
-        $token = $user->createToken( 'prodToken' )->plainTextToken;
-
-        $response = [
-            'user' => $user,
-            'token' => $token
-        ];
-
-        return response( $response, 201 );
+        return Response::errorResponse('Invalid Login credentials', 400);
     }
 
-    public function logout()
-    {
-        auth()->user()->tokens()->delete();
-        return response(
-            [
-                'message' => 'User logged out',
-                'status' => true
-            ],
-            200
-        );
-    }
 }
