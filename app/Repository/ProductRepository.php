@@ -38,7 +38,10 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getUserProducts()
     {
-//       return Product::user()->products;
+        $user = auth()->user();
+        $userProducts = $user->products;
+
+        return $userProducts;
     }
 
     public function activateProduct(int $id)
@@ -100,6 +103,12 @@ class ProductRepository implements ProductRepositoryInterface
     {
         $user = User::findOrFail($userID);
         $products = $user->products()->isActive(false)->get();
+        return $products;
+    }
+
+    public function search(string $search)
+    {
+        $products =  Product::where('name', 'like', '%'.$search.'%')->get();
         return $products;
     }
 }

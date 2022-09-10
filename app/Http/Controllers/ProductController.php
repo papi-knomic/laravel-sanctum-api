@@ -5,12 +5,26 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use App\Models\User;
+use App\Repository\ProductRepository;
+use App\Traits\Response;
+use Illuminate\Http\JsonResponse;
 
 
 class ProductController extends Controller
 {
+
     /**
-     * Display a listing of the resource.
+     * @var ProductRepository
+     */
+    private $productRepository;
+
+    public function __construct(ProductRepository $productRepository )
+    {
+        $this->productRepository = $productRepository;
+    }
+
+    /**
+     * Get all products.
      *
      * @return \Illuminate\Http\Response
      */
@@ -26,150 +40,161 @@ class ProductController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Get all active products
+     * @return JsonResponse
+     */
+    public function inactiveProducts()
+    {
+        $products = $this->productRepository->getInactiveProducts();
+        return  Response::successResponseWithData($products, 'Inactive products retrieved');
+    }
+
+    /**
+     * Get all inactive products
+     * @return JsonResponse
+     */
+    public function activeProducts()
+    {
+        $products = $this->productRepository->getActiveProducts();
+        return  Response::successResponseWithData($products, 'Active products received');
+    }
+
+    /**
+     * Create a new product.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     *
      */
     public function store(StoreProductRequest $request)
     {
         $formFields = $request->validated();
-        $product =  Product::create($formFields);
+        $product =  $this->productRepository->create($formFields);
 
-        return response([
-            'message' => 'Products created',
-            'status' => true,
-            'data' => $product
-        ], 201);
+        return  Response::successResponseWithData($product, 'Products created', 201 );
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Get a specific product.
      */
     public function show(Product $product)
     {
-        return response([
-            'message' => 'Product retrieved',
-            'status' => true,
-            'data' => $product
-        ], 201);
+        return  Response::successResponseWithData($product, 'Product retrieved');
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update product.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  Product  $product
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function update(StoreProductRequest $request, Product $product)
     {
-        $product->update($request->all());
+        $formFields = $request->validated();
+        $product =  $this->productRepository->update($product->id, $formFields);
 
-        return response([
-            'message' => 'Product updated',
-            'status' => true,
-            'data' => $product
-        ], 200);
+        return  Response::successResponseWithData($product, 'Product updated');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete product.
      *
      * @param  Product  $product
      * @return \Illuminate\Http\Response
      */
     public function destroy(Product $product)
     {
-        $product->delete();
-
-        return response([
-            'message' => 'Product deleted',
-            'status' => true,
-        ]);
+        $this->productRepository->delete($product->id);
+        return  Response::successResponse('Product deleted');
     }
 
     /**
-     * search for a name.
+     * search for a product.
      *
      * @param  string  $name
      * @return \Illuminate\Http\Response
      */
     public function search($name)
     {
-        $products =  Product::where('name', 'like', '%'.$name.'%')->get();
-
-        return response([
-            'message' => 'Products gotten',
-            'status' => true,
-            'data' => $products
-        ]);
-
+        $products = $this->productRepository->search($name);
+        return  Response::successResponseWithData($products, 'Products retrieved');
     }
 
-    public function products()
+    /**
+     * Get all user products
+     * @return JsonResponse
+     */
+    public function userProducts()
     {
-        $user = auth()->user();
-        $userProducts = $user->products;
-
-        return response([
-            'message' => 'Products retrieved for user',
-            'status' => true,
-            'data' => $userProducts
-        ]);
+        $userProducts = $this->productRepository->getUserProducts();
+        return  Response::successResponseWithData($userProducts, 'Products retrieved for user');
     }
 
-    public function inactiveProducts()
-    {
-        $products = Product::isActive(false)->get();
-
-        return response([
-            'message' => 'Inactive Products retrieved',
-            'status' => true,
-            'data' => $products
-        ]);
-    }
-
-    public function activeProducts()
-    {
-        $products = Product::isActive(true)->get();
-
-        return response([
-            'message' => 'Active Products retrieved',
-            'status' => true,
-            'data' => $products
-        ]);
-    }
-
+    /**
+     * Get all user active products
+     * @return JsonResponse
+     */
     public function activeUserProducts()
     {
-        $user = User::find(auth()->id());
-        $products = $user->products()->isActive(true)->get();
-
-        return response([
-            'message' => 'Active Products retrieved',
-            'status' => true,
-            'data' => $products
-        ]);
+        $userProducts = $this->productRepository->getUserActiveProducts();
+        return Response::successResponseWithData($userProducts, 'Active products retrieved for user');
     }
 
+    /**
+     * Get all user inactive products
+     * @return JsonResponse
+     */
     public function inactiveUserProducts()
     {
-        $user = User::find(auth()->id());
-        $products = $user->products()->isActive(false)->get();
-
-        return response([
-            'message' => 'Inactive Products retrieved',
-            'status' => true,
-            'data' => $products
-        ]);
+        $userProducts = $this->productRepository->getUserInactiveProducts();
+        return Response::successResponseWithData($userProducts, 'Inactive products retrieved for user');
     }
 
+    /**
+     * Get all user products by user id
+     * @return JsonResponse
+     */
+    public function productsByUserID(int $id) {
+        $userProducts = $this->productRepository->getProductsByUserID($id);
+        return Response::successResponseWithData($userProducts, 'Products retrieved for user');
+    }
 
+    /**
+     * Get all user active products by user id
+     * @return JsonResponse
+     */
+    public function activeProductsByUserID(int $id) {
+        $userProducts = $this->productRepository->getProductsByUserID($id);
+        return Response::successResponseWithData($userProducts, 'Products retrieved for user');
+    }
 
+    /**
+     * Get all user active products by user id
+     * @return JsonResponse
+     */
+    public function inActiveProductsByUserID(int $id) {
+        $userProducts = $this->productRepository->getProductsByUserID($id);
+        return Response::successResponseWithData($userProducts, 'Products retrieved for user');
+    }
 
+    /**
+     * Activate a meal
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function activateProduct(int $id) {
+        $this->productRepository->activateProduct($id);
+        return Response::successResponse('Meal activated');
+    }
+
+    /**
+     * Deactivate a meal
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function deactivateProduct(int $id) {
+        $this->productRepository->deactivateProduct($id);
+        return Response::successResponse('Meal deactivated');
+    }
 
 }
