@@ -164,7 +164,7 @@ class ProductController extends Controller
      * @return JsonResponse
      */
     public function activeProductsByUserID(int $id) {
-        $userProducts = $this->productRepository->getProductsByUserID($id);
+        $userProducts = $this->productRepository->getActiveProductsByUserID($id);
         return Response::successResponseWithData($userProducts, 'Products retrieved for user');
     }
 
@@ -173,7 +173,7 @@ class ProductController extends Controller
      * @return JsonResponse
      */
     public function inActiveProductsByUserID(int $id) {
-        $userProducts = $this->productRepository->getProductsByUserID($id);
+        $userProducts = $this->productRepository->getInactiveProductsByUserID($id);
         return Response::successResponseWithData($userProducts, 'Products retrieved for user');
     }
 

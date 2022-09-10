@@ -31,7 +31,7 @@ class Product extends Model
     /**
      * @var mixed
      */
-    public function scopeIsActive($query, bool $arg)
+    public function scopeIsActive($query, int $arg)
     {
         return $query->where('is_active', $arg);
     }

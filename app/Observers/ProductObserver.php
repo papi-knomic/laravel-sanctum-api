@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Product;
+use App\Traits\Response;
 use Illuminate\Support\Str;
 
 class ProductObserver
@@ -17,7 +18,7 @@ class ProductObserver
     {
         $product->slug = Str::slug($product->name);
         $product->user_id = auth()->id();
-        $product->is_active = true;
+        $product->is_active = 1;
     }
 
     /**
@@ -35,15 +36,11 @@ class ProductObserver
      * Handle the Product "updating" event.
      *
      * @param  \App\Models\Product  $product
-     * @return void
      */
     public function updating(Product $product)
     {
         if ($product->user_id != auth()->id()) {
-            return response([
-                'message' => 'Unauthorized action',
-                'status' => false,
-            ], 403);
+            return Response::errorResponse('Unauthorized action');
         }
         $product->slug = Str::slug($product->name);
     }
@@ -64,15 +61,11 @@ class ProductObserver
      * Handle the Product "deleting" event.
      *
      * @param  \App\Models\Product  $product
-     * @return void
      */
     public function deleting(Product $product)
     {
         if ($product->user_id != auth()->id()) {
-            return response([
-                'message' => 'Unauthorized action',
-                'status' => false,
-            ], 403);
+            return Response::errorResponse('Unauthorized action');
         }
     }
 

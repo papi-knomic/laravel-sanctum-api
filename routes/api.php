@@ -20,22 +20,24 @@ use Illuminate\Support\Facades\Route;
 //unprotected routes
 //Route::resource('products', ProductController::class);
 
-//all products
-Route::get('/products', [ProductController::class, 'index']);
-//all inactive products
-Route::get('/products/inactive', [ProductController::class, 'inactiveProducts']);
-//all inactive products
-Route::get('/products/active', [ProductController::class, 'activeProducts']);
-//product by id
-Route::get('/products/{product}', [ProductController::class, 'show']);
-//search for product
-Route::get('/products/search/{name}', [ProductController::class, 'search']);
-//get products by user id
-Route::get('products/user/{id}', [ProductController::class, 'productsByUserID']);
-//get active products by user id
-Route::get('products/user/{id}', [ProductController::class, 'activeProductsByUserID']);
-//get inactive products by user id
-Route::get('products/user/{id}', [ProductController::class, 'inactiveProductsByUserID']);
+Route::prefix('products')->group( function () {
+    //all products
+    Route::get('/', [ProductController::class, 'index']);
+    //all inactive products
+    Route::get('/inactive', [ProductController::class, 'inactiveProducts']);
+    //all inactive products
+    Route::get('/active', [ProductController::class, 'activeProducts']);
+    //product by id
+    Route::get('/{product}', [ProductController::class, 'show']);
+    //search for product
+    Route::get('/search/{name}', [ProductController::class, 'search']);
+    //get products by user id
+    Route::get('/user/{id}', [ProductController::class, 'productsByUserID']);
+    //get active products by user id
+    Route::get('/user/{id}/active', [ProductController::class, 'activeProductsByUserID']);
+    //get inactive products by user id
+    Route::get('/user/{id}/inactive', [ProductController::class, 'inactiveProductsByUserID']);
+});
 //register
 Route::post('/register', [AuthController::class, 'register']);
 //login
@@ -45,23 +47,24 @@ Route::post('/login', [AuthController::class, 'login']);
 //protected route
 Route::group( ['middleware' => ['auth:sanctum'] ], function (){
     //products
-    //create
-    Route::post('account/products', [ProductController::class, 'store']);
-    //update
-    Route::put('account//products/{product}', [ProductController::class, 'update']);
-    //delete
-    Route::delete('account/products/{product}', [ProductController::class, 'destroy']);
-    //get all user products
-    Route::get('/account/products', [ProductController::class, 'userProducts']);
-    //get all user active products
-    Route::get('/account/products/active', [ProductController::class, 'activeUserProducts']);
-    //get all user inactive products
-    Route::get('/account/products/inactive', [ProductController::class, 'inactiveUserProducts']);
-    //activate a meal
-    Route::put('account/products/activate/{id}', [ProductController::class, 'activateProduct']);
-    //activate a meal
-    Route::put('account/products/deactivate/{id}', [ProductController::class, 'deactivateProduct']);
-
+    Route::prefix('account')->group( function () {
+        //create
+        Route::post('/products', [ProductController::class, 'store']);
+        //update
+        Route::put('/products/{product}', [ProductController::class, 'update']);
+        //delete
+        Route::delete('/products/{product}', [ProductController::class, 'destroy']);
+        //get all user products
+        Route::get('/products', [ProductController::class, 'userProducts']);
+        //get all user active products
+        Route::get('/products/active', [ProductController::class, 'activeUserProducts']);
+        //get all user inactive products
+        Route::get('/products/inactive', [ProductController::class, 'inactiveUserProducts']);
+        //activate a meal
+        Route::put('/products/activate/{id}', [ProductController::class, 'activateProduct']);
+        //activate a meal
+        Route::put('/products/deactivate/{id}', [ProductController::class, 'deactivateProduct']);
+    });
     //auth
     Route::post('/logout', [AuthController::class, 'logout']);
 });

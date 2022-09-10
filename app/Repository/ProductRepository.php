@@ -60,18 +60,18 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getActiveProducts()
     {
-        return Product::isActive(true)->get();
+        return Product::isActive(1)->get();
     }
 
     public function getInactiveProducts()
     {
-        return Product::isActive(true)->get();
+        return Product::isActive(0)->get();
     }
 
     public function getUserActiveProducts()
     {
         $user = User::find(auth()->id());
-        $products = $user->products()->isActive(true)->get();
+        $products = $user->products()->isActive(1)->get();
 
         return $products;
     }
@@ -79,7 +79,7 @@ class ProductRepository implements ProductRepositoryInterface
     public function getUserInactiveProducts()
     {
         $user = User::find(auth()->id());
-        $products = $user->products()->isActive(false)->get();
+        $products = $user->products()->isActive(0)->get();
 
         return $products;
     }
@@ -95,14 +95,14 @@ class ProductRepository implements ProductRepositoryInterface
     public function getActiveProductsByUserID(int $userID)
     {
         $user = User::findOrFail($userID);
-        $products = $user->products()->isActive(true)->get();
+        $products = $user->products()->isActive(1)->get();
         return $products;
     }
 
     public function getInactiveProductsByUserID(int $userID)
     {
         $user = User::findOrFail($userID);
-        $products = $user->products()->isActive(false)->get();
+        $products = $user->products()->isActive(0)->get();
         return $products;
     }
 
